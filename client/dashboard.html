@@ -67,6 +67,9 @@
     .chatInput button {
       padding: 5px 10px;
     }
+    .leaflet-routing-container {
+        display: none !important;
+    }
   </style>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
@@ -107,6 +110,7 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 
 <script>
 const socket = io();
@@ -116,10 +120,58 @@ const spo2El = document.getElementById("spo2");
 const riskEl = document.getElementById("risk");
 const statusEl = document.getElementById("status");
 
+const hospitals = [
+  { name: "City Hospital", lat: 18.530, lng: 73.860 },
+  { name: "Care Hospital", lat: 18.540, lng: 73.880 },
+  { name: "Lifeline Hospital", lat: 18.510, lng: 73.840 }
+];
+
 // MAP
 const map = L.map('map').setView([18.52, 73.85], 13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 const marker = L.marker([18.52, 73.85]).addTo(map);
+
+function getDistance(lat1, lng1, lat2, lng2) {
+  return Math.sqrt(
+    (lat2 - lat1) ** 2 + (lng2 - lng1) ** 2
+  );
+}
+
+function findNearest(lat, lng) {
+  let nearest = null;
+  let minDist = Infinity;
+
+  hospitals.forEach(h => {
+    const dist = getDistance(lat, lng, h.lat, h.lng);
+    if (dist < minDist) {
+      minDist = dist;
+      nearest = h;
+    }
+  });
+
+  return nearest;
+}
+
+let routeControl;
+
+function drawRoute(from, to) {
+  if (routeControl) {
+    map.removeControl(routeControl);
+  }
+
+    routeControl = L.Routing.control({
+    waypoints: [
+        L.latLng(from[0], from[1]),
+        L.latLng(to.lat, to.lng)
+    ],
+    routeWhileDragging: false,
+
+    show: false, // ✅ hides instruction panel
+    addWaypoints: false,
+    draggableWaypoints: false,
+    fitSelectedRoutes: true
+    }).addTo(map);
+}
 
 // VITALS UPDATE
 socket.on("update", (data) => {
@@ -139,9 +191,16 @@ socket.on("update", (data) => {
 
   if (data.lat && data.lng) {
     const newPos = [data.lat, data.lng];
+
     marker.setLatLng(newPos);
     map.setView(newPos, 15);
-    setTimeout(() => map.invalidateSize(), 100);
+
+    const nearest = findNearest(data.lat, data.lng);
+
+    console.log("Nearest Hospital:", nearest.name);
+
+    // draw route ONLY when needed
+    drawRoute(newPos, nearest);
   }
 });
 
