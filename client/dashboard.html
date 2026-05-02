@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #121212;
+      color: white;
+      font-family: Arial;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .left {
+      width: 30%;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .right {
+      width: 45%;
+    }
+
+    .chatPanel {
+      width: 25%;
+      background: #1a1a1a;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .big {
+      font-size: 50px;
+      margin: 10px 0;
+    }
+
+    #status {
+      font-size: 30px;
+    }
+
+    #chatBox {
+      flex: 1;
+      overflow-y: auto;
+      background: #121212;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .chatInput {
+      display: flex;
+      gap: 5px;
+    }
+
+    .chatInput input {
+      flex: 1;
+      padding: 5px;
+    }
+
+    .chatInput button {
+      padding: 5px 10px;
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="left">
+    <h1>Hospital Dashboard</h1>
+
+    <div id="hr" class="big">HR: --</div>
+    <div id="spo2" class="big">SpO2: --</div>
+    <div id="risk" class="big">Risk: --</div>
+    <div id="status">Status: --</div>
+  </div>
+
+  <!-- MAP -->
+  <div class="right">
+    <div id="map" style="height: 100%;"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chatPanel">
+    <h3>💬 Chat</h3>
+
+    <div id="chatBox"></div>
+
+    <div class="chatInput">
+      <input id="msgInput" placeholder="Type message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+const socket = io();
+
+const hrEl = document.getElementById("hr");
+const spo2El = document.getElementById("spo2");
+const riskEl = document.getElementById("risk");
+const statusEl = document.getElementById("status");
+
+// MAP
+const map = L.map('map').setView([18.52, 73.85], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+const marker = L.marker([18.52, 73.85]).addTo(map);
+
+// VITALS UPDATE
+socket.on("update", (data) => {
+  hrEl.innerText = `HR: ${data.heartRate}`;
+  spo2El.innerText = `SpO2: ${data.spo2}`;
+  riskEl.innerText = `Risk: ${data.risk}%`;
+  statusEl.innerText = `Status: ${data.status}`;
+
+  let color = "#00FF9C";
+  if (data.risk > 80) color = "#FF3B30";
+  else if (data.risk > 50) color = "#FF9F0A";
+
+  hrEl.style.color = color;
+  spo2El.style.color = color;
+  riskEl.style.color = color;
+  statusEl.style.color = color;
+
+  if (data.lat && data.lng) {
+    const newPos = [data.lat, data.lng];
+    marker.setLatLng(newPos);
+    map.setView(newPos, 15);
+    setTimeout(() => map.invalidateSize(), 100);
+  }
+});
+
+// 💬 CHAT
+const chatBox = document.getElementById("chatBox");
+const msgInput = document.getElementById("msgInput");
+
+function sendMessage() {
+  const message = msgInput.value;
+  if (!message) return;
+
+  socket.emit("send_message", {
+    sender: "HOSPITAL",
+    message,
+    time: new Date().toLocaleTimeString()
+  });
+
+  msgInput.value = "";
+}
+
+socket.on("receive_message", (data) => {
+  const msg = document.createElement("div");
+
+  msg.innerHTML = `
+    <strong>${data.sender}</strong>
+    <span style="font-size:10px;color:gray;"> ${data.time}</span><br>
+    ${data.message}
+  `;
+
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+});
+</script>
+
+</body>
+</html>

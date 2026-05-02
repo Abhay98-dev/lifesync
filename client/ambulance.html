@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ambulance Panel</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #121212;
+      color: white;
+      font-family: Arial;
+    }
+
+    .container {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      width: 900px;
+      display: flex;
+      gap: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    /* LEFT SIDE (Vitals) */
+    .leftPanel {
+      width: 60%;
+    }
+
+    /* RIGHT SIDE (Chat) */
+    .rightPanel {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid #333;
+      padding-left: 15px;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+    }
+
+    .value {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #aaa;
+    }
+
+    canvas {
+      margin-top: 10px;
+      background: black;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,255,156,0.2);
+    }
+
+    .label {
+      font-size: 14px;
+      margin-top: 10px;
+      color: #aaa;
+    }
+
+    /* CHAT */
+    #chatBox {
+      flex: 1;
+      height: 250px;
+      overflow-y: auto;
+      background: #000;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .chatInput {
+      display: flex;
+      gap: 5px;
+    }
+
+    .chatInput input {
+      flex: 1;
+      padding: 6px;
+    }
+
+    .chatInput button {
+      padding: 6px 10px;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- LEFT: VITALS -->
+  <div class="leftPanel">
+    <h2>🚑 Ambulance Panel</h2>
+
+    <div class="value">Heart Rate: <span id="hrVal">--</span></div>
+    <input type="range" id="hr" min="60" max="180">
+
+    <div class="value">SpO2: <span id="spo2Val">--</span></div>
+    <input type="range" id="spo2" min="70" max="100">
+
+    <div class="status" id="state">State: STABLE</div>
+
+    <div class="label">Heart Rate </div>
+    <canvas id="hrGraph" height="80"></canvas>
+
+    <div class="label">SpO2 Monitor</div>
+    <canvas id="spo2Graph" height="80"></canvas>
+  </div>
+
+  <!-- RIGHT: CHAT -->
+  <div class="rightPanel">
+    <h3>💬 Chat</h3>
+
+    <div id="chatBox"></div>
+
+    <div class="chatInput">
+      <input id="msgInput" placeholder="Type message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+const socket = io();
+
+const hr = document.getElementById("hr");
+const spo2 = document.getElementById("spo2");
+
+const hrVal = document.getElementById("hrVal");
+const spo2Val = document.getElementById("spo2Val");
+const stateEl = document.getElementById("state");
+
+let state = "STABLE";
+let t = 0;
+
+// GRAPH SETUP
+function createChart(canvasId, color) {
+  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        borderColor: color,
+        borderWidth: 2,
+        tension: 0.4,
+        pointRadius: 0
+      }]
+    },
+    options: {
+      animation: false,
+      responsive: true,
+      scales: {
+        x: { display: false },
+        y: { display: false }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+const hrChart = createChart("hrGraph", "#FF3B30");
+const spo2Chart = createChart("spo2Graph", "#00BFFF");
+
+// VITAL GENERATION
+function generateVitals() {
+  t++;
+
+  let heartRate, spo2ValGenerated;
+
+  if (state === "STABLE") {
+    heartRate = 75 + Math.sin(t / 5) * 5;
+    spo2ValGenerated = 97 + Math.sin(t / 6) * 1;
+    if (t > 10) state = "WARNING";
+  } else if (state === "WARNING") {
+    heartRate = 105 + Math.sin(t / 3) * 10;
+    spo2ValGenerated = 93 + Math.sin(t / 4) * 2;
+    if (t > 20) state = "CRITICAL";
+  } else if (state === "CRITICAL") {
+    heartRate = 140 + Math.sin(t / 2) * 15;
+    spo2ValGenerated = 85 + Math.sin(t / 3) * 3;
+    if (t > 30) state = "RECOVERY";
+  } else if (state === "RECOVERY") {
+    heartRate = 100 + Math.sin(t / 4) * 8;
+    spo2ValGenerated = 95 + Math.sin(t / 5) * 2;
+    if (t > 40) {
+      t = 0;
+      state = "STABLE";
+    }
+  }
+
+  return {
+    heartRate: Math.round(heartRate),
+    spo2: Math.round(spo2ValGenerated)
+  };
+}
+
+// UPDATE GRAPH
+function updateChart(chart, value) {
+  chart.data.labels.push("");
+  chart.data.datasets[0].data.push(value);
+
+  if (chart.data.labels.length > 30) {
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.shift();
+  }
+
+  chart.update();
+}
+
+// SEND DATA
+function sendData() {
+  const vitals = generateVitals();
+
+  hr.value = vitals.heartRate;
+  spo2.value = vitals.spo2;
+
+  hrVal.innerText = vitals.heartRate;
+  spo2Val.innerText = vitals.spo2;
+  stateEl.innerText = "State: " + state;
+
+  updateChart(hrChart, vitals.heartRate);
+  updateChart(spo2Chart, vitals.spo2);
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      socket.emit("vitals", {
+        heartRate: vitals.heartRate,
+        spo2: vitals.spo2,
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        timestamp: Date.now()
+      });
+    }, () => {
+      socket.emit("vitals", {
+        heartRate: vitals.heartRate,
+        spo2: vitals.spo2,
+        lat: 18.52 + Math.random() * 0.05,
+        lng: 73.85 + Math.random() * 0.05,
+        timestamp: Date.now()
+      });
+    });
+  }
+}
+
+setInterval(sendData, 2000);
+
+// CHAT
+const chatBox = document.getElementById("chatBox");
+const msgInput = document.getElementById("msgInput");
+
+function sendMessage() {
+  const message = msgInput.value;
+  if (!message) return;
+
+  socket.emit("send_message", {
+    sender: "AMBULANCE",
+    message,
+    time: new Date().toLocaleTimeString()
+  });
+
+  msgInput.value = "";
+}
+
+socket.on("receive_message", (data) => {
+  const msg = document.createElement("div");
+
+  msg.innerHTML = `
+    <strong>${data.sender}</strong>
+    <span style="color:gray;font-size:10px;"> ${data.time}</span><br>
+    ${data.message}
+  `;
+
+  chatBox.appendChild(msg);
+  chatBox.scrollTop = chatBox.scrollHeight;
+});
+</script>
+
+</body>
+</html>
