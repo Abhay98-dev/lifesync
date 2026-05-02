@@ -1,476 +1,232 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Dashboard</title>
-<style>
-  /* ================= GLOBAL ================= */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  background: linear-gradient(135deg, #0f172a, #020617);
-  color: white;
-  font-family: 'Segoe UI', Arial, sans-serif;
-}
-
-/* ================= CONTAINER ================= */
-.container {
-  display: flex;
-  height: 100vh;
-  gap: 15px;
-  padding: 15px;
-}
-
-/* ================= PANELS ================= */
-.left, .leftPanel {
-  width: 30%;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.right {
-  width: 45%;
-}
-
-.rightPanel, .chatPanel {
-  width: 25%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* ================= CARD ================= */
-.card {
-  background: rgba(255,255,255,0.05);
-  border-radius: 16px;
-  padding: 15px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
-}
-
-.card-title {
-  font-size: 14px;
-  color: #94a3b8;
-}
-
-.card-value {
-  font-size: 32px;
-  font-weight: bold;
-  margin-top: 5px;
-}
-
-.card-unit {
-  font-size: 12px;
-  color: #64748b;
-}
-
-/* ================= COLORS ================= */
-.green { color: #00FF9C; }
-.yellow { color: #FF9F0A; }
-.red { color: #FF3B30; }
-.blue { color: #00BFFF; }
-
-/* ================= STATUS BADGE ================= */
-.badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: bold;
-  width: fit-content;
-}
-
-.badge.stable { background: #00FF9C; color: black; }
-.badge.warning { background: #FF9F0A; color: black; }
-.badge.critical { background: #FF3B30; color: white; }
-
-/* ================= HEADINGS ================= */
-h1, h2, h3 {
-  margin-bottom: 10px;
-}
-
-/* ================= RANGE SLIDER ================= */
-input[type="range"] {
-  width: 100%;
-  appearance: none;
-  height: 6px;
-  border-radius: 5px;
-  background: #1e293b;
-  outline: none;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  background: #00FF9C;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-/* ================= CANVAS (GRAPHS) ================= */
-canvas {
-  width: 100%;
-  height: 120px;
-  background: black;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,255,156,0.2);
-}
-
-/* ================= CHAT ================= */
-#chatBox {
-  flex: 1;
-  overflow-y: auto;
-  background: #020617;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-/* MESSAGE CONTAINER */
-.msg {
-  display: flex;
-  margin-bottom: 10px;
-}
-
-/* AMBULANCE (LEFT) */
-.msg.ambulance {
-  justify-content: flex-start;
-}
-
-/* HOSPITAL (RIGHT) */
-.msg.hospital {
-  justify-content: flex-end;
-}
-
-/* MESSAGE BUBBLE */
-.bubble {
-  max-width: 70%;
-  padding: 10px;
-  border-radius: 12px;
-  font-size: 13px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-
-/* COLORS */
-.msg.ambulance .bubble {
-  background: #1e293b;
-  color: white;
-}
-
-.msg.hospital .bubble {
-  background: #00FF9C;
-  color: black;
-}
-
-/* TIME */
-.time {
-  font-size: 10px;
-  opacity: 0.6;
-  margin-top: 5px;
-}
-
-/* ================= CHAT INPUT ================= */
-.chatInput {
-  display: flex;
-  gap: 5px;
-}
-
-.chatInput input {
-  flex: 1;
-  padding: 8px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-  background: #1e293b;
-  color: white;
-}
-
-.chatInput button {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: none;
-  background: #00FF9C;
-  cursor: pointer;
-}
-
-/* ================= MAP ================= */
-#map {
-  height: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-/* ================= PULSE MARKER ================= */
-.pulse {
-  width: 20px;
-  height: 20px;
-  background: #00BFFF;
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(0,191,255,0.7); }
-  70% { box-shadow: 0 0 0 20px rgba(0,191,255,0); }
-  100% { box-shadow: 0 0 0 0 rgba(0,191,255,0); }
-}
-
-/* ================= SCROLLBAR ================= */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 10px;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Hospital Command Dashboard</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+  <style>
+    /* Premium Dashboard UI */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; padding: 15px; gap: 15px; overflow: hidden; }
+    
+    .panel { background: rgba(30, 41, 59, 0.8); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 15px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px); }
+    .left-panel { width: 28%; min-width: 320px; overflow-y: auto; }
+    .middle-panel { flex: 1; border-radius: 16px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); }
+    .right-panel { width: 25%; min-width: 300px; }
+    
+    .card { background: rgba(0,0,0,0.5); padding: 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+    .card-title { color: #94a3b8; font-size: 13px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; margin-bottom: 4px; }
+    .card-subtitle { font-size: 11px; color: #64748b; margin-bottom: 8px; }
+    .card-value { font-size: 38px; font-weight: 900; }
+    
+    .text-green { color: #10b981; }
+    .text-yellow { color: #f59e0b; }
+    .text-red { color: #ef4444; }
+    
+    /* Map styling with high contrast dark mode */
+    #map { width: 100%; height: 100%; filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+    
+    .hash-box { font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #10b981; word-break: break-all; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3); line-height: 1.4; }
+    
+    /* Chat System */
+    #chatBox { flex: 1; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .chat-msg { font-size: 14px; padding: 10px 14px; border-radius: 12px; max-width: 85%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .chat-msg.ambulance { background: #334155; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .chat-msg.hospital { background: #10b981; align-self: flex-end; color: #020617; border-bottom-right-radius: 4px; }
+    .chat-input-row { display: flex; gap: 8px; margin-top: 10px; }
+    .chat-input-row input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; }
+    .chat-input-row button { padding: 12px 20px; border-radius: 8px; border: none; background: #10b981; color: #020617; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .chat-input-row button:hover { background: #059669; }
+    
+    /* Leaflet Routing Overrides */
+    .leaflet-routing-container { background: rgba(15, 23, 42, 0.9) !important; color: white !important; border-radius: 8px !important; border: 1px solid #334155 !important; max-height: 300px; overflow-y: auto; }
+    .leaflet-routing-alt { background: transparent !important; }
+    .leaflet-routing-alt h2 { color: #f8fafc; font-size: 16px; margin-bottom: 5px; }
+    .leaflet-routing-alt table { color: #cbd5e1; }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
 </head>
-
 <body>
+  <div class="panel left-panel">
+    <h2 style="margin-bottom: 5px; font-weight: 700; color: #f8fafc;">⚡ Agentic Command Center</h2>
+    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Autonomous Medical Co-Pilot Dashboard</p>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <div class="card" style="flex: 1;">
+        <div class="card-title">1. PERCEIVES</div>
+        <div class="card-subtitle">Live Heart Rate Ingestion</div>
+        <div id="hrDisplay" class="card-value" style="font-size: 28px;">--</div>
+      </div>
+      
+      <div class="card" style="flex: 1;">
+        <div class="card-title">1. PERCEIVES</div>
+        <div class="card-subtitle">Live Blood Oxygen Ingestion</div>
+        <div id="spo2Display" class="card-value" style="font-size: 28px;">--</div>
+      </div>
+    </div>
+    
+    <div class="card" id="statusCard" style="border: 2px solid #10b981; background: rgba(16, 185, 129, 0.05); margin-bottom: 10px;">
+      <div class="card-title">2. REASONS</div>
+      <div class="card-subtitle">Agentic Deterioration Risk Score</div>
+      <div id="statusDisplay" class="card-value text-green">STABLE</div>
+      <div id="riskDisplay" style="color: #cbd5e1; font-size: 16px; margin-top: 5px; font-weight: 600;">Risk Level: --%</div>
+    </div>
 
-<div class="container">
-
-  <!-- LEFT -->
-  <div class="left">
-    <h1>Hospital Dashboard</h1>
-
-    <div id="hr" class="big">HR: --</div>
-    <div id="spo2" class="big">SpO2: --</div>
-    <div id="risk" class="big">Risk: --</div>
-    <div id="status">Status: --</div>
+    <div class="card" style="margin-bottom: 10px; background: rgba(59, 130, 246, 0.1); border-color: #3b82f6;">
+      <div class="card-title">3. ACTS</div>
+      <div class="card-subtitle">Autonomous Route Assignment</div>
+      <div id="destinationDisplay" style="font-size: 16px; font-weight: 600; color: #60a5fa;">Awaiting coordinates...</div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">4. SECURES</div>
+      <div class="card-subtitle">Blockchain Ledger (SHA-256)</div>
+      <div id="hashDisplay" class="hash-box">Waiting for secure packet...</div>
+    </div>
   </div>
 
-  <!-- MAP -->
-  <div class="right">
-    <div id="map" style="height: 100%;"></div>
+  <div class="middle-panel">
+    <div id="map"></div>
   </div>
 
-  <!-- CHAT -->
-  <div class="chatPanel">
-    <h3>💬 Chat</h3>
-
+  <div class="panel right-panel">
+    <h2 style="margin-bottom: 5px;">💬 Comms</h2>
     <div id="chatBox"></div>
-
-    <div class="chatInput">
-      <input id="msgInput" placeholder="Type message..." />
+    <div class="chat-input-row">
+      <input type="text" id="msgInput" placeholder="Message ambulance..." onkeypress="if(event.key === 'Enter') sendMessage()">
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
 
-</div>
+  <script>
+    const socket = io();
+    
+    // UI Elements
+    const hrDisplay = document.getElementById('hrDisplay');
+    const spo2Display = document.getElementById('spo2Display');
+    const statusDisplay = document.getElementById('statusDisplay');
+    const riskDisplay = document.getElementById('riskDisplay');
+    const destinationDisplay = document.getElementById('destinationDisplay');
+    const hashDisplay = document.getElementById('hashDisplay');
+    const statusCard = document.getElementById('statusCard');
 
+    // Map Setup
+    const map = L.map('map').setView([18.52, 73.85], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    
+    const hospitalIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/8040/8040626.png',
+      iconSize: [40, 40],
+      iconAnchor: [20, 40]
+    });
+    
+    let hospitalMarker = null;
+    let ambulanceMarker = null;
+    let routingControl = null;
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    // Receive live updates
+    socket.on("update", data => {
+      const hr = data.heartRate || data.hr || '--';
+      const spo2 = data.spo2 || '--';
+      const status = data.status || "STABLE";
+      const risk = data.risk_score || data.risk || 0;
+      const hashStr = data.secure_hash || data.hash || "Hashing...";
+      const assignedHospital = data.assigned_hospital; 
+      
+      // Update UI
+      hrDisplay.innerText = hr + ' BPM';
+      spo2Display.innerText = spo2 + ' %';
+      statusDisplay.innerText = status;
+      riskDisplay.innerText = "Risk Level: " + risk + "%";
+      hashDisplay.innerText = hashStr;
+      
+      if(assignedHospital) {
+          destinationDisplay.innerText = assignedHospital.name + " (" + assignedHospital.type + ")";
+      }
+      
+      // Color coding & Critical Alerts
+      let colorClass = "text-green";
+      let borderColor = "#10b981";
+      let bgTheme = "rgba(16, 185, 129, 0.05)";
+      
+      if(status === "CRITICAL" || risk > 80) { 
+          colorClass = "text-red"; 
+          borderColor = "#ef4444"; 
+          bgTheme = "rgba(239, 68, 68, 0.1)";
+      } else if(status === "WARNING" || risk > 50) { 
+          colorClass = "text-yellow"; 
+          borderColor = "#f59e0b"; 
+          bgTheme = "rgba(245, 158, 11, 0.08)";
+      }
+      
+      statusDisplay.className = "card-value " + colorClass;
+      statusCard.style.borderColor = borderColor;
+      statusCard.style.backgroundColor = bgTheme;
 
-<script>
-const socket = io();
-
-const hrEl = document.getElementById("hr");
-const spo2El = document.getElementById("spo2");
-const riskEl = document.getElementById("risk");
-const statusEl = document.getElementById("status");
-
-// 🧠 Cache
-let cachedHospitals = [];
-let lastFetchTime = 0;
-let hospitalMarkers = [];
-let routeControl = null;
-
-// ✅ FIX: move outside
-let isFirstUpdate = true;
-let lastHospital = null;
-
-// 🗺️ MAP
-const map = L.map('map').setView([18.52, 73.85], 13);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-  .addTo(map);
-
-const marker = L.marker([18.52, 73.85]).addTo(map);
-
-// 📡 FETCH REAL HOSPITALS
-async function getNearbyHospitals(lat, lng) {
-  const query = `
-    [out:json];
-    node["amenity"="hospital"](around:5000, ${lat}, ${lng});
-    out;
-  `;
-
-  try {
-    const res = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      body: query
+      // Map Routing Update
+      if(data.lat && data.lng && assignedHospital) {
+        
+        // Update Hospital Pin
+        if(!hospitalMarker) {
+            // FIX: Snap the map to the real location on the very first ping!
+            map.setView([data.lat, data.lng], 14); 
+            
+            hospitalMarker = L.marker([assignedHospital.lat, assignedHospital.lng], {icon: hospitalIcon})
+                .addTo(map)
+                .bindPopup(`<b>${assignedHospital.name}</b><br>AI Assigned: ${assignedHospital.type}`)
+                .openPopup();
+        } else {
+            hospitalMarker.setLatLng([assignedHospital.lat, assignedHospital.lng])
+                .bindPopup(`<b>${assignedHospital.name}</b><br>AI Assigned: ${assignedHospital.type}`);
+        }
+          
+        // Update Ambulance Pin & Route
+        if(!ambulanceMarker) {
+          ambulanceMarker = L.marker([data.lat, data.lng]).addTo(map).bindPopup("<b>Ambulance 1</b>");
+          
+          routingControl = L.Routing.control({
+            waypoints: [
+              L.latLng(data.lat, data.lng),
+              L.latLng(assignedHospital.lat, assignedHospital.lng)
+            ],
+            routeWhileDragging: false,
+            showAlternatives: false,
+            fitSelectedRoutes: true,
+            lineOptions: { styles: [{ color: '#3b82f6', weight: 5, opacity: 0.8 }] },
+            createMarker: function() { return null; } 
+          }).addTo(map);
+        } else {
+          // Animate marker move
+          ambulanceMarker.setLatLng([data.lat, data.lng]);
+          
+          // Update route waypoints
+          routingControl.getPlan().setWaypoints([
+            L.latLng(data.lat, data.lng),
+            L.latLng(assignedHospital.lat, assignedHospital.lng)
+          ]);
+        }
+      }
     });
 
-    const data = await res.json();
+    // Chat Logic
+    const chatBox = document.getElementById('chatBox');
+    function sendMessage() {
+      const msg = document.getElementById('msgInput').value;
+      if (!msg.trim()) return;
+      socket.emit('send_message', { sender: 'HOSPITAL', message: msg, time: new Date().toLocaleTimeString() });
+      document.getElementById('msgInput').value = '';
+    }
 
-    return data.elements
-    .map(h => ({
-        name: h.tags?.name || "Unnamed Hospital",
-        lat: h.lat,
-        lng: h.lon
-    }))
-    .filter(h => {
-        const dist = Math.sqrt(
-        (h.lat - lat) ** 2 +
-        (h.lng - lng) ** 2
-        );
-        return dist < 0.05; // ✅ only nearby hospitals
+    socket.on('receive_message', data => {
+      const div = document.createElement('div');
+      div.className = `chat-msg ${data.sender.toLowerCase() === 'ambulance' ? 'ambulance' : 'hospital'}`;
+      div.innerHTML = `<div style="font-size: 11px; opacity: 0.7; margin-bottom: 3px;">${data.sender} • ${data.time}</div><div>${data.message}</div>`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
     });
-  } catch (err) {
-    console.error("Hospital fetch error:", err);
-    return [];
-  }
-}
-
-// 📏 DISTANCE
-function getDistance(lat1, lng1, lat2, lng2) {
-  return Math.sqrt(
-    (lat2 - lat1) ** 2 + (lng2 - lng1) ** 2
-  );
-}
-
-// 🏥 FIND NEAREST
-function findNearest(lat, lng, hospitals) {
-  let nearest = null;
-  let minDist = Infinity;
-
-  hospitals.forEach(h => {
-    const dist = getDistance(lat, lng, h.lat, h.lng);
-    if (dist < minDist) {
-      minDist = dist;
-      nearest = h;
-    }
-  });
-
-  return nearest;
-}
-
-// 🗺️ ROUTE
-function drawRoute(from, to) {
-  if (routeControl) {
-    map.removeControl(routeControl);
-  }
-
-  routeControl = L.Routing.control({
-    waypoints: [
-      L.latLng(from[0], from[1]),
-      L.latLng(to.lat, to.lng)
-    ],
-    routeWhileDragging: false,
-    show: false,
-    addWaypoints: false,
-    draggableWaypoints: false,
-    fitSelectedRoutes: false // ✅ FIXED
-  }).addTo(map);
-}
-
-// 🚑 REAL-TIME UPDATE
-socket.on("update", async (data) => {
-  // VITALS UI
-  hrEl.innerText = `HR: ${data.heartRate}`;
-  spo2El.innerText = `SpO2: ${data.spo2}`;
-  riskEl.innerText = `Risk: ${data.risk}%`;
-  statusEl.innerText = `Status: ${data.status}`;
-
-  let color = "#00FF9C";
-  if (data.risk > 80) color = "#FF3B30";
-  else if (data.risk > 50) color = "#FF9F0A";
-
-  hrEl.style.color = color;
-  spo2El.style.color = color;
-  riskEl.style.color = color;
-  statusEl.style.color = color;
-
-  if (data.lat && data.lng) {
-    const newPos = [data.lat, data.lng];
-
-    // ✅ FIX: only center once
-    if (isFirstUpdate) {
-      map.setView(newPos, 15);
-      isFirstUpdate = false;
-    }
-
-    marker.setLatLng(newPos);
-
-    const now = Date.now();
-
-    // 🔥 FETCH WITH CACHE
-    if (!cachedHospitals.length || now - lastFetchTime > 30000) {
-      cachedHospitals = await getNearbyHospitals(data.lat, data.lng);
-      lastFetchTime = now;
-
-      hospitalMarkers.forEach(m => map.removeLayer(m));
-      hospitalMarkers = [];
-
-      cachedHospitals.forEach(h => {
-        const m = L.marker([h.lat, h.lng])
-          .addTo(map)
-          .bindPopup(h.name);
-        hospitalMarkers.push(m);
-      });
-    }
-
-    if (!cachedHospitals.length) return;
-
-    const nearest = findNearest(data.lat, data.lng, cachedHospitals);
-
-    console.log("Nearest Hospital:", nearest.name);
-
-    // ✅ FIX: redraw route only if hospital changes
-    if (!lastHospital || lastHospital.name !== nearest.name) {
-      drawRoute(newPos, nearest);
-      lastHospital = nearest;
-    }
-  }
-
-    if (!cachedHospitals.length || now - lastFetchTime > 30000) {
-    const newHospitals = await getNearbyHospitals(data.lat, data.lng);
-
-    if (newHospitals.length > 0) {
-        cachedHospitals = newHospitals;
-        lastFetchTime = now;
-    } else {
-        console.log("No nearby hospitals found — keeping old data");
-    }
-    }
-});
-
-// 💬 CHAT (unchanged)
-const chatBox = document.getElementById("chatBox");
-const msgInput = document.getElementById("msgInput");
-
-function sendMessage() {
-  const message = msgInput.value;
-  if (!message) return;
-
-  socket.emit("send_message", {
-    sender: "HOSPITAL",
-    message,
-    time: new Date().toLocaleTimeString()
-  });
-
-  msgInput.value = "";
-}
-
-socket.on("receive_message", (data) => {
-  const msg = document.createElement("div");
-
-  msg.innerHTML = `
-    <strong>${data.sender}</strong>
-    <span style="font-size:10px;color:gray;"> ${data.time}</span><br>
-    ${data.message}
-  `;
-
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-});
-</script>
+  </script>
 </body>
 </html>
