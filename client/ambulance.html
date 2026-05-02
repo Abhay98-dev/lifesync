@@ -2,84 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ambulance Telemetry Panel</title>
+  <title>Ambulance Edge Telemetry</title>
   <style>
-    /* Premium UI */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; display: flex; padding: 15px; gap: 15px; overflow: hidden;}
+    body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; height: 100vh; display: flex; padding: 15px; gap: 15px; overflow: hidden;}
     .panel { background: rgba(30, 41, 59, 0.7); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 15px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
-    .left-panel { flex: 2; overflow-y: auto; }
-    .right-panel { flex: 1; }
+    .left-panel { flex: 2; overflow-y: auto; } .right-panel { flex: 1; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .card { background: rgba(0,0,0,0.4); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); position: relative; }
-    .card-title { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 5px; }
-    .card-value { font-size: 56px; font-weight: 900; margin: 10px 0; font-variant-numeric: tabular-nums; }
-    .val-hr { color: #ef4444; text-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
-    .val-spo2 { color: #0ea5e9; text-shadow: 0 0 20px rgba(14, 165, 233, 0.4); }
-    .badge { padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; display: inline-block; text-transform: uppercase; border: 2px solid transparent; }
+    .card { background: rgba(0,0,0,0.4); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+    .card-title { color: #94a3b8; font-size: 14px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; }
+    .card-value { font-size: 56px; font-weight: 900; margin: 10px 0; }
+    .val-hr { color: #ef4444; } .val-spo2 { color: #0ea5e9; }
+    .badge { padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; border: 2px solid transparent; }
     .badge.stable { background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: #10b981; }
     .badge.warning { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border-color: #f59e0b; }
     .badge.critical { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: #ef4444; }
+    .badge.offline { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border-color: #64748b; }
     canvas { width: 100%; height: 120px !important; background: #000; border-radius: 8px; border: 1px solid #334155; }
-    
-    /* Agentic Status Banner */
-    .agentic-banner { background: rgba(14, 165, 233, 0.1); border: 1px solid #0ea5e9; border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 12px; color: #bae6fd; text-align: center; letter-spacing: 0.5px; }
-    
-    /* Chat */
+    .agentic-banner { background: rgba(14, 165, 233, 0.1); border: 1px solid #0ea5e9; border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 12px; color: #bae6fd; text-align: center; }
     #chatBox { flex: 1; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-    .chat-msg { font-size: 14px; padding: 10px 14px; border-radius: 12px; max-width: 85%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-    .chat-msg.ambulance { background: #1e293b; align-self: flex-end; border-bottom-right-radius: 4px; border: 1px solid #3b82f6; }
-    .chat-msg.hospital { background: #10b981; align-self: flex-start; border-bottom-left-radius: 4px; color: #020617; }
+    .chat-msg { font-size: 14px; padding: 10px 14px; border-radius: 12px; max-width: 85%; }
+    .chat-msg.ambulance { background: #1e293b; align-self: flex-end; border: 1px solid #3b82f6; }
+    .chat-msg.hospital { background: #10b981; align-self: flex-start; color: #020617; }
     .chat-input-row { display: flex; gap: 8px; }
-    .chat-input-row input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; font-size: 14px; }
-    .chat-input-row button { padding: 12px 20px; border-radius: 8px; border: none; background: #3b82f6; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .chat-input-row button:hover { background: #2563eb; }
+    .chat-input-row input { flex: 1; padding: 12px; border-radius: 8px; background: #1e293b; color: white; border: none; }
+    .chat-input-row button { padding: 12px 20px; border-radius: 8px; border: none; background: #3b82f6; color: white; cursor: pointer; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
   <div class="panel left-panel">
-    <div class="agentic-banner">
-      ⚡ <b>AGENTIC AI ACTIVE:</b> Autonomously perceiving vitals, reasoning risk scores, and ready to act.
+    <div class="agentic-banner">⚡ <b>AGENTIC AI ACTIVE:</b> Autonomously perceiving vitals, reasoning risk scores, and executing routes.</div>
+    
+    <!-- ABHA ID SEARCH -->
+    <div class="card" style="margin-bottom: 10px; display: flex; gap: 10px; align-items: center; padding: 10px;">
+      <input type="text" id="abhaInput" placeholder="Enter ABHA ID (e.g., 14-1234-5678-9012)" style="flex: 1; padding: 10px; border-radius: 6px; background: #1e293b; color: white; border: 1px solid #334155;">
+      <button onclick="fetchPatient()" style="padding: 10px 15px; background: #0ea5e9; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Lookup</button>
     </div>
-    <h2 style="color: #f8fafc; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+    
+    <div id="patientInfoAmbulance" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; text-align: left;"></div>
+
+    <h2 style="display: flex; justify-content: space-between; align-items: center;">
       <span>🚑 Ambulance Telemetry Panel</span>
       <span id="aiStatus" class="badge stable">STABLE</span>
     </h2>
-    
     <div class="grid-2">
-      <div class="card">
-        <div class="card-title">Heart Rate (BPM)</div>
-        <div class="card-value val-hr" id="hrDisplay">80</div>
-        <div style="font-size: 11px; color: #64748b; margin-top: 5px;">Live Stream AI Ingestion</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Blood Oxygen (%)</div>
-        <div class="card-value val-spo2" id="spo2Display">98</div>
-        <div style="font-size: 11px; color: #64748b; margin-top: 5px;">Live Stream AI Ingestion</div>
-      </div>
+      <div class="card"><div class="card-title">Heart Rate (BPM)</div><div class="card-value val-hr" id="hrDisplay">80</div></div>
+      <div class="card"><div class="card-title">Blood Oxygen (%)</div><div class="card-value val-spo2" id="spo2Display">98</div></div>
     </div>
-
-    <div class="card" style="text-align: left; padding: 15px;">
-      <div class="card-title" style="margin-bottom: 10px; display: flex; justify-content: space-between;">
-        <span>ECG Monitor</span>
-        <span style="color: #ef4444; font-size: 12px;">● LIVE</span>
-      </div>
-      <canvas id="hrGraph"></canvas>
-    </div>
-    
-    <div class="card" style="text-align: left; padding: 15px;">
-      <div class="card-title" style="margin-bottom: 10px; display: flex; justify-content: space-between;">
-        <span>Plethysmograph (SpO2)</span>
-        <span style="color: #0ea5e9; font-size: 12px;">● LIVE</span>
-      </div>
-      <canvas id="spo2Graph"></canvas>
-    </div>
+    <div class="card" style="text-align: left; padding: 15px;"><div class="card-title">ECG Monitor</div><canvas id="hrGraph"></canvas></div>
+    <div class="card" style="text-align: left; padding: 15px;"><div class="card-title">Plethysmograph (SpO2)</div><canvas id="spo2Graph"></canvas></div>
   </div>
-
   <div class="panel right-panel">
-    <h2 style="margin-bottom: 5px;">💬 Communications</h2>
+    <h2>💬 Communications</h2>
     <div id="chatBox"></div>
     <div class="chat-input-row">
       <input type="text" id="msgInput" placeholder="Message hospital..." onkeypress="if(event.key === 'Enter') sendMessage()">
@@ -89,113 +65,75 @@
 
   <script>
     const socket = io();
-    
     const hrDisplay = document.getElementById('hrDisplay');
     const spo2Display = document.getElementById('spo2Display');
     const aiStatus = document.getElementById('aiStatus');
 
-    let currentHR = 80;
-    let currentSpO2 = 98;
-    
+    // ABHA Logic
+    function fetchPatient() {
+        socket.emit('fetch_patient', document.getElementById('abhaInput').value);
+    }
+    socket.on('patient_data_received', (patient) => {
+        const div = document.getElementById('patientInfoAmbulance');
+        div.style.display = 'block';
+        div.innerHTML = `<strong style="color: #10b981;">👤 Verified ABHA Identity</strong><br>Name: ${patient.name} | Age: ${patient.age} | Blood: ${patient.blood_group}<br><span style="color: #ef4444;">⚠️ Allergies: ${patient.allergies.join(", ")}</span>`;
+    });
+
+    let currentHR = 80; let currentSpO2 = 98;
+    let currentLat = 18.5204; let currentLng = 73.8567;
+    let offlineQueue = []; // DEAD ZONE CACHE
+
     setInterval(() => {
         currentHR += Math.floor((Math.random() - 0.4) * 6); 
         currentSpO2 += Math.floor((Math.random() - 0.6) * 3); 
-        
-        if (currentHR < 40) currentHR = 40;
-        if (currentHR > 160) currentHR = 160;
-        if (currentSpO2 > 100) currentSpO2 = 100;
-        if (currentSpO2 < 75) currentSpO2 = 75; 
-        
-        hrDisplay.innerText = currentHR;
-        spo2Display.innerText = currentSpO2;
+        if (currentHR < 40) currentHR = 40; if (currentHR > 160) currentHR = 160;
+        if (currentSpO2 > 100) currentSpO2 = 100; if (currentSpO2 < 75) currentSpO2 = 75; 
+        hrDisplay.innerText = currentHR; spo2Display.innerText = currentSpO2;
     }, 2500);
 
-    // Chart Setup...
-    const ecgPattern = [0, 0.05, 0.1, 0, -0.2, 1.8, -0.7, 0, 0, 0.1, 0.2, 0.15, 0];
-    let ecgIndex = 0;
-    
-    const initChart = (id, color, yMin, yMax) => {
-      return new Chart(document.getElementById(id).getContext('2d'), {
-        type: 'line',
-        data: { labels: Array(150).fill(''), datasets: [{ data: Array(150).fill(0), borderColor: color, borderWidth: 2.5, tension: 0.1, pointRadius: 0 }] },
-        options: { animation: false, scales: { x: { display: false }, y: { display: false, min: yMin, max: yMax } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false, layout: { padding: 5 } }
-      });
-    };
+    if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(pos => { currentLat = pos.coords.latitude; currentLng = pos.coords.longitude; }); }
+    setInterval(() => { currentLat += (Math.random() - 0.2) * 0.0002; currentLng += (Math.random() - 0.2) * 0.0002; }, 3000);
 
-    const hrChart = initChart('hrGraph', '#ef4444', -1.5, 2.5);
-    const spo2ChartObj = new Chart(document.getElementById('spo2Graph').getContext('2d'), {
-        type: 'line',
-        data: { labels: Array(150).fill(''), datasets: [{ data: Array(150).fill(98), borderColor: '#0ea5e9', borderWidth: 2.5, tension: 0.4, pointRadius: 0 }] },
-        options: { animation: false, scales: { x: { display: false }, y: { display: false, min: 70, max: 105 } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false }
-    });
-
-    let wavePhase = 0;
+    // DEAD ZONE BURST LOGIC
     setInterval(() => {
-      let ecgValue = 0;
-      const beatFrames = Math.floor(6000 / currentHR); 
-      if (ecgIndex < ecgPattern.length) { ecgValue = ecgPattern[ecgIndex]; ecgIndex++; } 
-      else if (Math.random() < 1/beatFrames) { ecgIndex = 0; } 
-      else { ecgValue = (Math.random() - 0.5) * 0.05; }
-
-      hrChart.data.datasets[0].data.push(ecgValue);
-      hrChart.data.datasets[0].data.shift();
-      hrChart.update();
-
-      wavePhase += 0.2;
-      const spo2Wave = currentSpO2 + Math.sin(wavePhase) * 1.5 + (Math.random() - 0.5) * 0.2;
-      spo2ChartObj.data.datasets[0].data.push(spo2Wave);
-      spo2ChartObj.data.datasets[0].data.shift();
-      spo2ChartObj.update();
-    }, 20);
-
-    // Real-Time Location Tracking
-    let currentLat = 18.5204;
-    let currentLng = 73.8567;
-    let locationSimTimer;
-    
-    // Grab real GPS, then start driving simulator from that spot
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        currentLat = pos.coords.latitude;
-        currentLng = pos.coords.longitude;
-        startSimulation();
-      }, err => {
-        startSimulation();
-      }, { enableHighAccuracy: true });
-    } else {
-        startSimulation();
-    }
-
-    function startSimulation() {
-        locationSimTimer = setInterval(() => {
-            currentLat += (Math.random() - 0.2) * 0.0002;
-            currentLng += (Math.random() - 0.2) * 0.0002;
-        }, 3000);
-    }
-
-    setInterval(() => {
-      socket.emit('vitals', { heartRate: currentHR, spo2: currentSpO2, lat: currentLat, lng: currentLng, timestamp: Date.now() });
+      const data = { heartRate: currentHR, spo2: currentSpO2, lat: currentLat, lng: currentLng, timestamp: Date.now() };
+      if (socket.connected) {
+        if (offlineQueue.length > 0) {
+            console.log(`📡 Bursting ${offlineQueue.length} cached packets.`);
+            offlineQueue.forEach(savedData => socket.emit('vitals', savedData));
+            offlineQueue = [];
+        }
+        socket.emit('vitals', data);
+      } else {
+        offlineQueue.push(data);
+        aiStatus.innerText = `DEAD ZONE CACHE: ${offlineQueue.length}`; aiStatus.className = 'badge offline';
+      }
     }, 2000);
 
-    socket.on('update', data => {
-      const statusStr = data.status || "STABLE";
-      aiStatus.innerText = "AI PREDICTION: " + statusStr;
-      aiStatus.className = 'badge ' + statusStr.toLowerCase();
-    });
+    const initChart = (id, color, min, max) => new Chart(document.getElementById(id).getContext('2d'), { type: 'line', data: { labels: Array(100).fill(''), datasets: [{ data: Array(100).fill(0), borderColor: color, borderWidth: 2, pointRadius: 0 }] }, options: { animation: false, scales: { x: { display: false }, y: { display: false, min, max } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } });
+    const hrChart = initChart('hrGraph', '#ef4444', -1.5, 2.5); const spo2ChartObj = initChart('spo2Graph', '#0ea5e9', 70, 105);
+
+    const ecgPattern = [0, 0.05, 0.1, 0, -0.2, 1.8, -0.7, 0, 0, 0.1, 0.2, 0.15, 0]; let ecgIndex = 0; let wavePhase = 0;
+    setInterval(() => {
+      let ecgValue = 0; const beatFrames = Math.floor(6000 / currentHR); 
+      if (ecgIndex < ecgPattern.length) { ecgValue = ecgPattern[ecgIndex]; ecgIndex++; } 
+      else if (Math.random() < 1/beatFrames) { ecgIndex = 0; } else { ecgValue = (Math.random() - 0.5) * 0.05; }
+      hrChart.data.datasets[0].data.push(ecgValue); hrChart.data.datasets[0].data.shift(); hrChart.update();
+      wavePhase += 0.2; const spo2Wave = currentSpO2 + Math.sin(wavePhase) * 1.5 + (Math.random() - 0.5) * 0.2;
+      spo2ChartObj.data.datasets[0].data.push(spo2Wave); spo2ChartObj.data.datasets[0].data.shift(); spo2ChartObj.update();
+    }, 20);
+
+    socket.on('update', data => { if(socket.connected) { aiStatus.innerText = "AI PREDICTION: " + (data.status || "STABLE"); aiStatus.className = 'badge ' + (data.status || "STABLE").toLowerCase(); } });
 
     function sendMessage() {
-      const msg = document.getElementById('msgInput').value;
-      if (!msg.trim()) return;
+      const msg = document.getElementById('msgInput').value; if (!msg.trim()) return;
       socket.emit('send_message', { sender: 'AMBULANCE', message: msg, time: new Date().toLocaleTimeString() });
       document.getElementById('msgInput').value = '';
     }
-
     socket.on('receive_message', data => {
-      const div = document.createElement('div');
-      div.className = `chat-msg ${data.sender.toLowerCase() === 'ambulance' ? 'ambulance' : 'hospital'}`;
+      const div = document.createElement('div'); div.className = `chat-msg ${data.sender.toLowerCase() === 'ambulance' ? 'ambulance' : 'hospital'}`;
       div.innerHTML = `<div style="font-size: 11px; opacity: 0.7; margin-bottom: 3px;">${data.sender} • ${data.time}</div><div>${data.message}</div>`;
-      document.getElementById('chatBox').appendChild(div);
-      document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+      document.getElementById('chatBox').appendChild(div); document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
     });
   </script>
 </body>
