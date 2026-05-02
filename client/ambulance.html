@@ -4,99 +4,170 @@
   <title>Ambulance Panel</title>
 
   <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #121212;
-      color: white;
-      font-family: Arial;
-    }
+/* ================= GLOBAL ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    .container {
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      width: 900px;
-      display: flex;
-      gap: 20px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
+body {
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: white;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
 
-    /* LEFT SIDE (Vitals) */
-    .leftPanel {
-      width: 60%;
-    }
+/* ================= CONTAINER ================= */
+.container {
+  display: flex;
+  height: 100vh;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
 
-    /* RIGHT SIDE (Chat) */
-    .rightPanel {
-      width: 40%;
-      display: flex;
-      flex-direction: column;
-      border-left: 1px solid #333;
-      padding-left: 15px;
-    }
+/* ================= LEFT ================= */
+.leftPanel {
+  width: 65%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
 
-    h2 {
-      margin-bottom: 15px;
-    }
+/* ================= RIGHT ================= */
+.rightPanel {
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  padding: 10px;
+}
 
-    .value {
-      font-size: 18px;
-      margin-bottom: 5px;
-    }
+/* ================= CARD ================= */
+.card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
 
-    input[type="range"] {
-      width: 100%;
-      margin-bottom: 10px;
-    }
+.card-title {
+  font-size: 13px;
+  color: #94a3b8;
+}
 
-    .status {
-      margin-top: 10px;
-      font-size: 16px;
-      color: #aaa;
-    }
+.card-value {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 3px;
+}
 
-    canvas {
-      margin-top: 10px;
-      background: black;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0,255,156,0.2);
-    }
+/* COLORS */
+.green { color: #00FF9C; text-shadow: 0 0 8px #00FF9C; }
+.blue { color: #00BFFF; text-shadow: 0 0 8px #00BFFF; }
 
-    .label {
-      font-size: 14px;
-      margin-top: 10px;
-      color: #aaa;
-    }
+/* STATUS */
+.badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
 
-    /* CHAT */
-    #chatBox {
-      flex: 1;
-      height: 250px;
-      overflow-y: auto;
-      background: #000;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      font-size: 12px;
-    }
+.badge.stable { background: #00FF9C; color: black; }
+.badge.warning { background: #FF9F0A; color: black; }
+.badge.critical { background: #FF3B30; color: white; }
 
-    .chatInput {
-      display: flex;
-      gap: 5px;
-    }
+/* ================= ROW ================= */
+.row {
+  display: flex;
+  gap: 10px;
+}
 
-    .chatInput input {
-      flex: 1;
-      padding: 6px;
-    }
+.row .card {
+  flex: 1;
+}
 
-    .chatInput button {
-      padding: 6px 10px;
-    }
+/* ================= SLIDER ================= */
+input[type="range"] {
+  width: 100%;
+  height: 5px;
+  background: #1e293b;
+}
+
+/* ================= GRAPH ================= */
+canvas {
+  width: 100%;
+  height: 80px !important;
+  background: black;
+  border-radius: 8px;
+}
+
+/* ================= CHAT ================= */
+#chatBox {
+  flex: 1;
+  overflow-y: auto;
+  background: #020617;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+/* MESSAGES */
+.msg {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.msg.ambulance { justify-content: flex-start; }
+.msg.hospital { justify-content: flex-end; }
+
+.bubble {
+  max-width: 70%;
+  padding: 8px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.msg.ambulance .bubble {
+  background: #1e293b;
+}
+
+.msg.hospital .bubble {
+  background: #00FF9C;
+  color: black;
+}
+
+.time {
+  font-size: 9px;
+  opacity: 0.6;
+}
+
+/* INPUT */
+.chatInput {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.chatInput input {
+  flex: 1;
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  background: #1e293b;
+  color: white;
+}
+
+.chatInput button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  background: #00FF9C;
+  cursor: pointer;
+}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -106,28 +177,49 @@
 
 <div class="container">
 
-  <!-- LEFT: VITALS -->
+  <!-- LEFT -->
   <div class="leftPanel">
-    <h2>🚑 Ambulance Panel</h2>
+    <h3>🚑 Ambulance Panel</h3>
 
-    <div class="value">Heart Rate: <span id="hrVal">--</span></div>
+    <!-- ROW: HR + SPO2 -->
+    <div class="row">
+      <div class="card">
+        <div class="card-title">Heart Rate</div>
+        <div class="card-value green" id="hrVal">--</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SpO2</div>
+        <div class="card-value blue" id="spo2Val">--</div>
+      </div>
+    </div>
+
+    <!-- SLIDERS -->
     <input type="range" id="hr" min="60" max="180">
-
-    <div class="value">SpO2: <span id="spo2Val">--</span></div>
     <input type="range" id="spo2" min="70" max="100">
 
-    <div class="status" id="state">State: STABLE</div>
+    <!-- STATE -->
+    <div class="card">
+      <div class="card-title">State</div>
+      <div id="state" class="badge stable">STABLE</div>
+    </div>
 
-    <div class="label">Heart Rate </div>
-    <canvas id="hrGraph" height="80"></canvas>
+    <!-- ECG -->
+    <div class="card">
+      <div class="card-title">Heart Rate (ECG)</div>
+      <canvas id="hrGraph"></canvas>
+    </div>
 
-    <div class="label">SpO2 Monitor</div>
-    <canvas id="spo2Graph" height="80"></canvas>
+    <!-- SPO2 GRAPH -->
+    <div class="card">
+      <div class="card-title">SpO2 Monitor</div>
+      <canvas id="spo2Graph"></canvas>
+    </div>
   </div>
 
-  <!-- RIGHT: CHAT -->
+  <!-- RIGHT -->
   <div class="rightPanel">
-    <h3>💬 Chat</h3>
+    <h4>💬 Chat</h4>
 
     <div id="chatBox"></div>
 
@@ -153,10 +245,11 @@ const stateEl = document.getElementById("state");
 
 let state = "STABLE";
 let t = 0;
+let lastLocation = null;
 
-// GRAPH SETUP
-function createChart(canvasId, color) {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+/* CHART */
+function createChart(id, color) {
+  return new Chart(document.getElementById(id), {
     type: 'line',
     data: {
       labels: [],
@@ -164,20 +257,14 @@ function createChart(canvasId, color) {
         data: [],
         borderColor: color,
         borderWidth: 2,
-        tension: 0.4,
+        tension: 0,
         pointRadius: 0
       }]
     },
     options: {
       animation: false,
-      responsive: true,
-      scales: {
-        x: { display: false },
-        y: { display: false }
-      },
-      plugins: {
-        legend: { display: false }
-      }
+      scales: { x: { display: false }, y: { display: false } },
+      plugins: { legend: { display: false } }
     }
   });
 }
@@ -185,90 +272,104 @@ function createChart(canvasId, color) {
 const hrChart = createChart("hrGraph", "#FF3B30");
 const spo2Chart = createChart("spo2Graph", "#00BFFF");
 
-// VITAL GENERATION
+/* ECG */
+function generateECG() {
+  const p = [0, 0.2, 0, -0.5, 3, -1.5, 0, 0];
+  return p[Math.floor(Math.random() * p.length)];
+}
+
+/* VITALS */
 function generateVitals() {
   t++;
 
   let heartRate, spo2ValGenerated;
 
   if (state === "STABLE") {
-    heartRate = 75 + Math.sin(t / 5) * 5;
-    spo2ValGenerated = 97 + Math.sin(t / 6) * 1;
+    heartRate = 80;
+    spo2ValGenerated = 97;
     if (t > 10) state = "WARNING";
   } else if (state === "WARNING") {
-    heartRate = 105 + Math.sin(t / 3) * 10;
-    spo2ValGenerated = 93 + Math.sin(t / 4) * 2;
+    heartRate = 110;
+    spo2ValGenerated = 93;
     if (t > 20) state = "CRITICAL";
   } else if (state === "CRITICAL") {
-    heartRate = 140 + Math.sin(t / 2) * 15;
-    spo2ValGenerated = 85 + Math.sin(t / 3) * 3;
+    heartRate = 140;
+    spo2ValGenerated = 85;
     if (t > 30) state = "RECOVERY";
-  } else if (state === "RECOVERY") {
-    heartRate = 100 + Math.sin(t / 4) * 8;
-    spo2ValGenerated = 95 + Math.sin(t / 5) * 2;
-    if (t > 40) {
-      t = 0;
-      state = "STABLE";
-    }
+  } else {
+    heartRate = 100;
+    spo2ValGenerated = 95;
+    if (t > 40) { t = 0; state = "STABLE"; }
   }
 
-  return {
-    heartRate: Math.round(heartRate),
-    spo2: Math.round(spo2ValGenerated)
-  };
+  return { heartRate, spo2: spo2ValGenerated };
 }
 
-// UPDATE GRAPH
+/* UI */
+function updateStateUI(state) {
+  stateEl.className = "badge";
+  if (state === "STABLE") stateEl.classList.add("stable");
+  else if (state === "WARNING") stateEl.classList.add("warning");
+  else stateEl.classList.add("critical");
+  stateEl.innerText = state;
+}
+
 function updateChart(chart, value) {
   chart.data.labels.push("");
   chart.data.datasets[0].data.push(value);
-
   if (chart.data.labels.length > 30) {
     chart.data.labels.shift();
     chart.data.datasets[0].data.shift();
   }
-
   chart.update();
 }
 
-// SEND DATA
+/* MAIN LOOP */
 function sendData() {
-  const vitals = generateVitals();
+  const v = generateVitals();
 
-  hr.value = vitals.heartRate;
-  spo2.value = vitals.spo2;
+  hr.value = v.heartRate;
+  spo2.value = v.spo2;
 
-  hrVal.innerText = vitals.heartRate;
-  spo2Val.innerText = vitals.spo2;
-  stateEl.innerText = "State: " + state;
+  hrVal.innerText = v.heartRate;
+  spo2Val.innerText = v.spo2;
 
-  updateChart(hrChart, vitals.heartRate);
-  updateChart(spo2Chart, vitals.spo2);
+  updateStateUI(state);
+
+  updateChart(hrChart, generateECG());
+  updateChart(spo2Chart, v.spo2);
 
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      socket.emit("vitals", {
-        heartRate: vitals.heartRate,
-        spo2: vitals.spo2,
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        timestamp: Date.now()
-      });
-    }, () => {
-      socket.emit("vitals", {
-        heartRate: vitals.heartRate,
-        spo2: vitals.spo2,
-        lat: 18.52 + Math.random() * 0.05,
-        lng: 73.85 + Math.random() * 0.05,
-        timestamp: Date.now()
-      });
-    });
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        lastLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+
+        socket.emit("vitals", {
+          heartRate: v.heartRate,
+          spo2: v.spo2,
+          lat: lastLocation.lat,
+          lng: lastLocation.lng,
+          timestamp: Date.now()
+        });
+      },
+      () => {
+        if (lastLocation) {
+          socket.emit("vitals", {
+            heartRate: v.heartRate,
+            spo2: v.spo2,
+            lat: lastLocation.lat,
+            lng: lastLocation.lng,
+            timestamp: Date.now()
+          });
+        }
+      }
+    );
   }
 }
 
 setInterval(sendData, 2000);
 
-// CHAT
+/* CHAT */
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 
@@ -288,10 +389,15 @@ function sendMessage() {
 socket.on("receive_message", (data) => {
   const msg = document.createElement("div");
 
+  msg.className = data.sender === "AMBULANCE"
+    ? "msg ambulance"
+    : "msg hospital";
+
   msg.innerHTML = `
-    <strong>${data.sender}</strong>
-    <span style="color:gray;font-size:10px;"> ${data.time}</span><br>
-    ${data.message}
+    <div class="bubble">
+      <div>${data.message}</div>
+      <div class="time">${data.time}</div>
+    </div>
   `;
 
   chatBox.appendChild(msg);

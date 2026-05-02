@@ -2,76 +2,231 @@
 <html>
 <head>
   <title>Dashboard</title>
+<style>
+  /* ================= GLOBAL ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  <style>
-    body {
-      margin: 0;
-      background: #121212;
-      color: white;
-      font-family: Arial;
-    }
+body {
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: white;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
 
-    .container {
-      display: flex;
-      height: 100vh;
-    }
+/* ================= CONTAINER ================= */
+.container {
+  display: flex;
+  height: 100vh;
+  gap: 15px;
+  padding: 15px;
+}
 
-    .left {
-      width: 30%;
-      padding: 30px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+/* ================= PANELS ================= */
+.left, .leftPanel {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
-    .right {
-      width: 45%;
-    }
+.right {
+  width: 45%;
+}
 
-    .chatPanel {
-      width: 25%;
-      background: #1a1a1a;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-    }
+.rightPanel, .chatPanel {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-    .big {
-      font-size: 50px;
-      margin: 10px 0;
-    }
+/* ================= CARD ================= */
+.card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
 
-    #status {
-      font-size: 30px;
-    }
+.card-title {
+  font-size: 14px;
+  color: #94a3b8;
+}
 
-    #chatBox {
-      flex: 1;
-      overflow-y: auto;
-      background: #121212;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
+.card-value {
+  font-size: 32px;
+  font-weight: bold;
+  margin-top: 5px;
+}
 
-    .chatInput {
-      display: flex;
-      gap: 5px;
-    }
+.card-unit {
+  font-size: 12px;
+  color: #64748b;
+}
 
-    .chatInput input {
-      flex: 1;
-      padding: 5px;
-    }
+/* ================= COLORS ================= */
+.green { color: #00FF9C; }
+.yellow { color: #FF9F0A; }
+.red { color: #FF3B30; }
+.blue { color: #00BFFF; }
 
-    .chatInput button {
-      padding: 5px 10px;
-    }
-    .leaflet-routing-container {
-        display: none !important;
-    }
-  </style>
+/* ================= STATUS BADGE ================= */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  width: fit-content;
+}
 
+.badge.stable { background: #00FF9C; color: black; }
+.badge.warning { background: #FF9F0A; color: black; }
+.badge.critical { background: #FF3B30; color: white; }
+
+/* ================= HEADINGS ================= */
+h1, h2, h3 {
+  margin-bottom: 10px;
+}
+
+/* ================= RANGE SLIDER ================= */
+input[type="range"] {
+  width: 100%;
+  appearance: none;
+  height: 6px;
+  border-radius: 5px;
+  background: #1e293b;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #00FF9C;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* ================= CANVAS (GRAPHS) ================= */
+canvas {
+  width: 100%;
+  height: 120px;
+  background: black;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,255,156,0.2);
+}
+
+/* ================= CHAT ================= */
+#chatBox {
+  flex: 1;
+  overflow-y: auto;
+  background: #020617;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+/* MESSAGE CONTAINER */
+.msg {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+/* AMBULANCE (LEFT) */
+.msg.ambulance {
+  justify-content: flex-start;
+}
+
+/* HOSPITAL (RIGHT) */
+.msg.hospital {
+  justify-content: flex-end;
+}
+
+/* MESSAGE BUBBLE */
+.bubble {
+  max-width: 70%;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+/* COLORS */
+.msg.ambulance .bubble {
+  background: #1e293b;
+  color: white;
+}
+
+.msg.hospital .bubble {
+  background: #00FF9C;
+  color: black;
+}
+
+/* TIME */
+.time {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-top: 5px;
+}
+
+/* ================= CHAT INPUT ================= */
+.chatInput {
+  display: flex;
+  gap: 5px;
+}
+
+.chatInput input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #1e293b;
+  color: white;
+}
+
+.chatInput button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #00FF9C;
+  cursor: pointer;
+}
+
+/* ================= MAP ================= */
+#map {
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* ================= PULSE MARKER ================= */
+.pulse {
+  width: 20px;
+  height: 20px;
+  background: #00BFFF;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0,191,255,0.7); }
+  70% { box-shadow: 0 0 0 20px rgba(0,191,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,191,255,0); }
+}
+
+/* ================= SCROLLBAR ================= */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+</style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 </head>
 
@@ -108,6 +263,7 @@
 
 </div>
 
+
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
@@ -120,24 +276,68 @@ const spo2El = document.getElementById("spo2");
 const riskEl = document.getElementById("risk");
 const statusEl = document.getElementById("status");
 
-const hospitals = [
-  { name: "City Hospital", lat: 18.530, lng: 73.860 },
-  { name: "Care Hospital", lat: 18.540, lng: 73.880 },
-  { name: "Lifeline Hospital", lat: 18.510, lng: 73.840 }
-];
+// 🧠 Cache
+let cachedHospitals = [];
+let lastFetchTime = 0;
+let hospitalMarkers = [];
+let routeControl = null;
 
-// MAP
+// ✅ FIX: move outside
+let isFirstUpdate = true;
+let lastHospital = null;
+
+// 🗺️ MAP
 const map = L.map('map').setView([18.52, 73.85], 13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+  .addTo(map);
+
 const marker = L.marker([18.52, 73.85]).addTo(map);
 
+// 📡 FETCH REAL HOSPITALS
+async function getNearbyHospitals(lat, lng) {
+  const query = `
+    [out:json];
+    node["amenity"="hospital"](around:5000, ${lat}, ${lng});
+    out;
+  `;
+
+  try {
+    const res = await fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
+      body: query
+    });
+
+    const data = await res.json();
+
+    return data.elements
+    .map(h => ({
+        name: h.tags?.name || "Unnamed Hospital",
+        lat: h.lat,
+        lng: h.lon
+    }))
+    .filter(h => {
+        const dist = Math.sqrt(
+        (h.lat - lat) ** 2 +
+        (h.lng - lng) ** 2
+        );
+        return dist < 0.05; // ✅ only nearby hospitals
+    });
+  } catch (err) {
+    console.error("Hospital fetch error:", err);
+    return [];
+  }
+}
+
+// 📏 DISTANCE
 function getDistance(lat1, lng1, lat2, lng2) {
   return Math.sqrt(
     (lat2 - lat1) ** 2 + (lng2 - lng1) ** 2
   );
 }
 
-function findNearest(lat, lng) {
+// 🏥 FIND NEAREST
+function findNearest(lat, lng, hospitals) {
   let nearest = null;
   let minDist = Infinity;
 
@@ -152,29 +352,28 @@ function findNearest(lat, lng) {
   return nearest;
 }
 
-let routeControl;
-
+// 🗺️ ROUTE
 function drawRoute(from, to) {
   if (routeControl) {
     map.removeControl(routeControl);
   }
 
-    routeControl = L.Routing.control({
+  routeControl = L.Routing.control({
     waypoints: [
-        L.latLng(from[0], from[1]),
-        L.latLng(to.lat, to.lng)
+      L.latLng(from[0], from[1]),
+      L.latLng(to.lat, to.lng)
     ],
     routeWhileDragging: false,
-
-    show: false, // ✅ hides instruction panel
+    show: false,
     addWaypoints: false,
     draggableWaypoints: false,
-    fitSelectedRoutes: true
-    }).addTo(map);
+    fitSelectedRoutes: false // ✅ FIXED
+  }).addTo(map);
 }
 
-// VITALS UPDATE
-socket.on("update", (data) => {
+// 🚑 REAL-TIME UPDATE
+socket.on("update", async (data) => {
+  // VITALS UI
   hrEl.innerText = `HR: ${data.heartRate}`;
   spo2El.innerText = `SpO2: ${data.spo2}`;
   riskEl.innerText = `Risk: ${data.risk}%`;
@@ -192,19 +391,58 @@ socket.on("update", (data) => {
   if (data.lat && data.lng) {
     const newPos = [data.lat, data.lng];
 
-    marker.setLatLng(newPos);
-    map.setView(newPos, 15);
+    // ✅ FIX: only center once
+    if (isFirstUpdate) {
+      map.setView(newPos, 15);
+      isFirstUpdate = false;
+    }
 
-    const nearest = findNearest(data.lat, data.lng);
+    marker.setLatLng(newPos);
+
+    const now = Date.now();
+
+    // 🔥 FETCH WITH CACHE
+    if (!cachedHospitals.length || now - lastFetchTime > 30000) {
+      cachedHospitals = await getNearbyHospitals(data.lat, data.lng);
+      lastFetchTime = now;
+
+      hospitalMarkers.forEach(m => map.removeLayer(m));
+      hospitalMarkers = [];
+
+      cachedHospitals.forEach(h => {
+        const m = L.marker([h.lat, h.lng])
+          .addTo(map)
+          .bindPopup(h.name);
+        hospitalMarkers.push(m);
+      });
+    }
+
+    if (!cachedHospitals.length) return;
+
+    const nearest = findNearest(data.lat, data.lng, cachedHospitals);
 
     console.log("Nearest Hospital:", nearest.name);
 
-    // draw route ONLY when needed
-    drawRoute(newPos, nearest);
+    // ✅ FIX: redraw route only if hospital changes
+    if (!lastHospital || lastHospital.name !== nearest.name) {
+      drawRoute(newPos, nearest);
+      lastHospital = nearest;
+    }
   }
+
+    if (!cachedHospitals.length || now - lastFetchTime > 30000) {
+    const newHospitals = await getNearbyHospitals(data.lat, data.lng);
+
+    if (newHospitals.length > 0) {
+        cachedHospitals = newHospitals;
+        lastFetchTime = now;
+    } else {
+        console.log("No nearby hospitals found — keeping old data");
+    }
+    }
 });
 
-// 💬 CHAT
+// 💬 CHAT (unchanged)
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 
@@ -234,6 +472,5 @@ socket.on("receive_message", (data) => {
   chatBox.scrollTop = chatBox.scrollHeight;
 });
 </script>
-
 </body>
 </html>
