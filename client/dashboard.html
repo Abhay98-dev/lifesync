@@ -7,25 +7,36 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #020617; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; display: flex; height: 100vh; padding: 15px; gap: 15px; overflow: hidden; }
-    .panel { background: rgba(30, 41, 59, 0.8); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 15px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px); }
+    body { background: #020617; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; display: flex; height: 100vh; padding: 15px; gap: 15px; overflow: hidden; background-image: radial-gradient(circle at top right, #0f172a, #020617); }
+    .panel { background: rgba(15, 23, 42, 0.6); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
     .left-panel { width: 28%; min-width: 320px; overflow-y: auto; }
-    .middle-panel { flex: 1; border-radius: 16px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1); }
+    .middle-panel { flex: 1; border-radius: 16px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
     .right-panel { width: 25%; min-width: 300px; }
-    .card { background: rgba(0,0,0,0.5); padding: 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-    .card-title { color: #94a3b8; font-size: 13px; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+    .card { background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8)); padding: 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.2s, box-shadow 0.2s; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+    .card-title { color: #94a3b8; font-size: 13px; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; letter-spacing: 0.5px; }
     .card-subtitle { font-size: 11px; color: #64748b; margin-bottom: 8px; }
-    .card-value { font-size: 38px; font-weight: 900; }
-    .text-green { color: #10b981; } .text-yellow { color: #f59e0b; } .text-red { color: #ef4444; }
-    #map { width: 100%; height: 100%; filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%); }
-    .hash-box { font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #10b981; word-break: break-all; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3); line-height: 1.4; }
-    #chatBox { flex: 1; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .chat-msg { font-size: 14px; padding: 10px 14px; border-radius: 12px; max-width: 85%; }
-    .chat-msg.ambulance { background: #334155; align-self: flex-start; }
-    .chat-msg.hospital { background: #10b981; align-self: flex-end; color: #020617; }
+    .card-value { font-size: 38px; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
+    .text-green { color: #10b981; text-shadow: 0 0 15px rgba(16, 185, 129, 0.4); } 
+    .text-yellow { color: #f59e0b; text-shadow: 0 0 15px rgba(245, 158, 11, 0.4); } 
+    .text-red { color: #ef4444; text-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+    @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    .pulse-critical { animation: pulse-red 2s infinite; border-color: #ef4444 !important; }
+    #map { width: 100%; height: 100%; filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%); transition: 0.3s; }
+    .hash-box { font-family: 'Courier New', Courier, monospace; font-size: 11px; color: #10b981; word-break: break-all; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3); line-height: 1.4; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+    #chatBox { flex: 1; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
+    .chat-msg { font-size: 14px; padding: 10px 14px; border-radius: 12px; max-width: 85%; animation: fadeIn 0.3s ease-out; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-msg.ambulance { background: #1e293b; align-self: flex-start; border: 1px solid #334155; border-bottom-left-radius: 2px; }
+    .chat-msg.hospital { background: linear-gradient(135deg, #10b981, #059669); align-self: flex-end; color: #fff; border-bottom-right-radius: 2px; }
+    .chat-msg.agent { background: rgba(14, 165, 233, 0.15); border: 1px solid #0ea5e9; align-self: center; color: #bae6fd; font-size: 12px; text-align: center; width: 100%; max-width: 100%; font-style: italic; }
     .chat-input-row { display: flex; gap: 8px; margin-top: 10px; }
-    .chat-input-row input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; }
-    .chat-input-row button { padding: 12px 20px; border-radius: 8px; border: none; background: #10b981; color: #020617; font-weight: bold; cursor: pointer; }
+    .chat-input-row input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: rgba(30, 41, 59, 0.8); color: white; transition: 0.2s; }
+    .chat-input-row input:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 10px rgba(14, 165, 233, 0.2); }
+    .chat-input-row button { padding: 12px 20px; border-radius: 8px; border: none; background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    .chat-input-row button:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+    .qa-btn { background: rgba(59, 130, 246, 0.15); border: 1px solid #3b82f6; color: #bae6fd; padding: 6px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: 0.2s; flex: 1; white-space: nowrap; }
+    .qa-btn:hover { background: #3b82f6; color: #fff; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4); }
     .leaflet-routing-container { background: rgba(15, 23, 42, 0.9) !important; color: white !important; border-radius: 8px !important; border: 1px solid #334155 !important; max-height: 300px; overflow-y: auto; }
     .leaflet-routing-alt { background: transparent !important; }
     .leaflet-routing-alt h2 { color: #f8fafc; font-size: 16px; margin-bottom: 5px; }
@@ -56,6 +67,7 @@
     </div>
     <div class="card" id="statusCard" style="border: 2px solid #10b981; background: rgba(16, 185, 129, 0.05); margin-bottom: 10px;">
       <div class="card-title">2. REASONS</div><div class="card-subtitle">Agentic Deterioration Risk Score</div><div id="statusDisplay" class="card-value text-green">STABLE</div><div id="riskDisplay" style="color: #cbd5e1; font-size: 16px; margin-top: 5px; font-weight: 600;">Risk Level: --%</div>
+      <div id="horizonDisplay" style="color: #f59e0b; font-size: 14px; margin-top: 5px; font-weight: bold;">Triage Horizon: Stable</div>
     </div>
     <div class="card" style="margin-bottom: 10px; background: rgba(59, 130, 246, 0.1); border-color: #3b82f6;">
       <div class="card-title">3. ACTS</div><div class="card-subtitle">Autonomous Route Assignment</div><div id="destinationDisplay" style="font-size: 16px; font-weight: 600; color: #60a5fa;">Awaiting coordinates...</div>
@@ -66,7 +78,12 @@
   </div>
   <div class="middle-panel"><div id="map"></div></div>
   <div class="panel right-panel">
-    <h2 style="margin-bottom: 5px;">💬 Comms</h2>
+    <h2 style="margin-bottom: 5px; color: #f8fafc; display: flex; align-items: center; gap: 8px;">💬 Agent-Assisted Comms <span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></span></h2>
+    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 5px;">
+        <button class="qa-btn" onclick="sendQuickMsg('Standing by to receive patient.')">Standby</button>
+        <button class="qa-btn" onclick="sendQuickMsg('Preparing Trauma Bay 1.')">Prep Trauma</button>
+        <button class="qa-btn" onclick="sendQuickMsg('Requesting ETA update.')">Req ETA</button>
+    </div>
     <div id="chatBox"></div>
     <div class="chat-input-row">
       <input type="text" id="msgInput" placeholder="Message ambulance..." onkeypress="if(event.key === 'Enter') sendMessage()">
@@ -98,17 +115,52 @@
       hrDisplay.innerText = (data.heartRate || data.hr || '--') + ' BPM';
       spo2Display.innerText = (data.spo2 || '--') + ' %';
       statusDisplay.innerText = status; riskDisplay.innerText = "Risk Level: " + risk + "%";
+      if(data.triage_horizon) document.getElementById('horizonDisplay').innerText = "Triage Horizon: " + data.triage_horizon;
       hashDisplay.innerText = data.secure_hash || data.hash || "Hashing...";
       if(assignedHospital) destinationDisplay.innerText = assignedHospital.name + " (" + assignedHospital.type + ")";
       
       let colorClass = "text-green"; let borderColor = "#10b981"; let bgTheme = "rgba(16, 185, 129, 0.05)";
-      if(status === "CRITICAL" || risk > 80) { colorClass = "text-red"; borderColor = "#ef4444"; bgTheme = "rgba(239, 68, 68, 0.1)"; } 
-      else if(status === "WARNING" || risk > 50) { colorClass = "text-yellow"; borderColor = "#f59e0b"; bgTheme = "rgba(245, 158, 11, 0.08)"; }
+      statusCard.className = "card"; // reset pulse
+      
+      if(status === "CRITICAL" || risk > 80) { 
+          colorClass = "text-red"; borderColor = "#ef4444"; bgTheme = "rgba(239, 68, 68, 0.1)"; 
+          statusCard.classList.add('pulse-critical');
+          
+          // Auto Agent Message
+          if(!window.hasAlertedCritical) {
+              const div = document.createElement('div'); div.className = 'chat-msg agent';
+              div.innerHTML = `⚠️ <b>AI SYSTEM ALERT:</b> Patient deteriorated to CRITICAL. Pre-fetching blood and resources.`;
+              document.getElementById('chatBox').appendChild(div); document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+              window.hasAlertedCritical = true;
+          }
+      } 
+      else if(status === "WARNING" || risk > 50) { 
+          colorClass = "text-yellow"; borderColor = "#f59e0b"; bgTheme = "rgba(245, 158, 11, 0.08)"; 
+          window.hasAlertedCritical = false;
+      } else {
+          window.hasAlertedCritical = false;
+      }
       
       statusDisplay.className = "card-value " + colorClass;
       statusCard.style.borderColor = borderColor; statusCard.style.backgroundColor = bgTheme;
 
       if(data.lat && data.lng && assignedHospital) {
+        if(!window.allHospMarkers) window.allHospMarkers = {};
+        
+        // Render all hospitals in the region
+        if(assignedHospital.all_hospitals) {
+            assignedHospital.all_hospitals.forEach(h => {
+                let id = h.name.replace(/\s+/g, '');
+                let hIcon = h.name === assignedHospital.name ? hospitalIcon : L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/8040/8040626.png', iconSize: [25, 25] });
+                if(!window.allHospMarkers[id]) {
+                    window.allHospMarkers[id] = L.marker([h.lat, h.lng], {icon: hIcon}).addTo(map)
+                        .bindPopup(`<b>${h.name}</b><br>Type: ${h.type}<br>Status: ${h.capacity_full ? '<span style="color:red">ER FULL - BYPASSED</span>' : '<span style="color:#10b981">AVAILABLE</span>'}`);
+                } else {
+                    window.allHospMarkers[id].setLatLng([h.lat, h.lng]).setIcon(hIcon);
+                }
+            });
+        }
+
         if(!hospitalMarker) {
             map.setView([data.lat, data.lng], 14); 
             hospitalMarker = L.marker([assignedHospital.lat, assignedHospital.lng], {icon: hospitalIcon}).addTo(map).bindPopup(`<b>${assignedHospital.name}</b><br>AI Assigned: ${assignedHospital.type}`).openPopup();
@@ -125,6 +177,10 @@
       }
     });
 
+    function sendQuickMsg(msg) {
+      document.getElementById('msgInput').value = msg;
+      sendMessage();
+    }
     function sendMessage() {
       const msg = document.getElementById('msgInput').value; if (!msg.trim()) return;
       socket.emit('send_message', { sender: 'HOSPITAL', message: msg, time: new Date().toLocaleTimeString() });

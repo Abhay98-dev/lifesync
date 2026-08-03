@@ -35,8 +35,12 @@ io.on('connection', (socket) => {
         try {
             const aiResponse = await axios.post(`${PYTHON_AI_BASE_URL}/predict`, data);
             io.emit('update', {
-                ...data, risk: aiResponse.data.risk_score, status: aiResponse.data.status,
-                hash: aiResponse.data.secure_hash, assigned_hospital: aiResponse.data.assigned_hospital
+                ...data, 
+                risk: aiResponse.data.risk_score, 
+                status: aiResponse.data.status,
+                hash: aiResponse.data.secure_hash, 
+                assigned_hospital: aiResponse.data.assigned_hospital,
+                triage_horizon: aiResponse.data.triage_horizon // Added for Predictive Triage
             });
         } catch (error) {
             console.error("🔴 AI Engine unreachable. Fallback engaged.");
